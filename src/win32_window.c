@@ -647,6 +647,7 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
             break;
         }
 
+        case WM_DESTROY:
         case WM_CLOSE:
         {
             _glfwInputWindowCloseRequest(window);
@@ -2702,22 +2703,29 @@ GLFWAPI GLFWwindow* glfwAttachWin32Window(HWND handle, GLFWwindow* share)
     return (GLFWwindow*) window;
 }
 
-GLFWAPI void glfwAttachToWin32Window(GLFWwindow* handle, HWND share)
+GLFWAPI void glfwAttachToWin32Window(GLFWwindow* handle, HWND const share)
 {
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-    SetParent(window->win32.handle, share);
+    _GLFWwindow * window = (_GLFWwindow*) handle;
 
     LONG Style = GetWindowLong(window->win32.handle, GWL_STYLE);
-    Style &= ~WS_POPUP;
-    Style |= WS_CHILDWINDOW;
-    SetWindowLong(window->win32.handle, GWL_STYLE, Style);
 
-    ShowWindow(window->win32.handle, SW_SHOW);
-    ShowWindow(share, SW_SHOW);
+    if (share != NULL)
+    {
+        Style &= ~WS_POPUP;
+        // Style |= WS_CHILD; lose inputs if child
+        SetWindowLong(window->win32.handle, GWL_STYLE, Style);
+    }
 
-    window->win32.external = GLFW_TRUE;
-    window->win32.externalWindowProc = GetWindowLongPtrW(window->win32.handle, GWLP_WNDPROC);
-    SetWindowLongPtrW(window->win32.handle, GWLP_WNDPROC, (LONG_PTR) windowProc);
+    HWND result = SetParent(window->win32.handle, share);
+
+    if (share == NULL)
+    {
+        Style &= ~WS_CHILD;
+        Style |= WS_POPUP;
+        SetWindowLong(window->win32.handle, GWL_STYLE, Style);
+    }
+
+    window->win32.external = share != NULL ? GLFW_TRUE : GLFW_FALSE;
 }
 #endif // _GLFW_WIN32
 
