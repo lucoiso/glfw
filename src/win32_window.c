@@ -2702,5 +2702,21 @@ GLFWAPI GLFWwindow* glfwAttachWin32Window(HWND handle, GLFWwindow* share)
     return (GLFWwindow*) window;
 }
 
+GLFWAPI void glfwAttachToWin32Window(GLFWwindow* window, HWND target)
+{
+    HWND const MyHandle = glfwGetWin32Window(window);
+
+    SetParent(MyHandle, target);
+
+    LONG Style = GetWindowLong(MyHandle, GWL_STYLE);
+    Style &= ~WS_POPUP;
+    Style |= WS_CHILDWINDOW;
+    SetWindowLong(MyHandle, GWL_STYLE, Style);
+
+    ShowWindow(MyHandle, SW_SHOW);
+    ShowWindow(target, SW_SHOW);
+
+    SetWindowLongPtrW(MyHandle, GWLP_WNDPROC, (LONG_PTR)windowProc);
+}
 #endif // _GLFW_WIN32
 
