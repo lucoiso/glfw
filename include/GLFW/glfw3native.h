@@ -251,7 +251,7 @@ GLFWAPI HWND glfwGetWin32Window(GLFWwindow* window);
  *  @ingroup native
  */
 GLFWAPI GLFWwindow* glfwAttachWin32Window(HWND handle, GLFWwindow* share);
-GLFWAPI void glfwAttachToWin32Window(GLFWwindow* window, HWND target);
+GLFWAPI void glfwAttachToWin32Window(GLFWwindow* handle, HWND share);
 #endif
 
 #if defined(GLFW_EXPOSE_NATIVE_WGL)
